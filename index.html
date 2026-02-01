@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoutIA - Predicción Inteligente para Transporte Público | Sevilla</title>
+    <meta name="description" content="RoutIA transforma la planificación del transporte público en Sevilla mediante predicción inteligente de demanda basada en IA. Optimiza tu flota, reduce costes y mejora el servicio.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stripe removed - pendiente de definición de precios -->
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary: #1e293b;
+            --accent: #00d4aa;
+            --accent-light: #5eead4;
+            --white: #ffffff;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #00d4aa 100%);
+            --gradient-accent: linear-gradient(135deg, #00d4aa 0%, #5eead4 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--gray-700);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--gradient-accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            font-size: 1.25rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-cta {
+            background: var(--gradient-accent);
+            color: var(--primary-dark) !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600 !important;
+        }
+
+        /* HERO CON VIDEO DE FONDO */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: var(--primary-dark);
+        }
+
+        .hero-video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.7) 50%, rgba(0, 212, 170, 0.2) 100%);
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 212, 170, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title span {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: rgba(255,255,255,0.8);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: var(--primary-dark);
+            padding: 1rem 2.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 170, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 4rem;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .hero-stat-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* SECCIONES GENERALES */
+        section {
+            padding: 6rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: rgba(0, 212, 170, 0.1);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* PROBLEMA Y SOLUCION */
+        .problem-solution {
+            background: var(--gray-100);
+        }
+
+        .ps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .ps-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .ps-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .ps-card.problem h3 { color: #ef4444; }
+        .ps-card.solution h3 { color: var(--accent); }
+
+        .ps-list {
+            list-style: none;
+        }
+
+        .ps-list li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .ps-list i {
+            margin-top: 0.25rem;
+        }
+
+        /* CARACTERISTICAS */
+        .features {
+            background: var(--white);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--gray-100);
+            padding: 2.5rem;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.75rem;
+            color: var(--primary-dark);
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+
+        .feature-card p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        /* PAQUETES DE PRECIOS */
+        .pricing {
+            background: var(--primary-dark);
+            color: var(--white);
+        }
+
+        .pricing .section-title {
+            color: var(--white);
+        }
+
+        .pricing .section-subtitle {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+        }
+
+        .pricing-card.featured {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-accent);
+            color: var(--primary-dark);
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .pricing-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-desc {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-price {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .pricing-lines {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .pricing-features i {
+            color: var(--accent);
+        }
+
+        .pricing-btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .pricing-btn-primary {
+            background: var(--gradient-accent);
+            color: var(--primary-dark);
+        }
+
+        .pricing-btn-secondary {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .pricing-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* DEMO INTERACTIVA */
+        .demo {
+            background: var(--gray-100);
+        }
+
+        .demo-container {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .demo-form {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-form select,
+        .demo-form input {
+            padding: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .demo-form button {
+            background: var(--gradient-accent);
+            color: var(--primary-dark);
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 170, 0.4);
+        }
+
+        .demo-results {
+            display: none;
+        }
+
+        .demo-results.active {
+            display: block;
+        }
+
+        .demo-chart {
+            height: 300px;
+            background: var(--gray-100);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+        }
+
+        /* TESTIMONIOS */
+        .testimonials {
+            background: var(--white);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: var(--gray-100);
+            padding: 2rem;
+            border-radius: 16px;
+        }
+
+        .testimonial-stars {
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: var(--gray-700);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .testimonial-name {
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .testimonial-role {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* CTA FINAL */
+        .cta-final {
+            background: var(--gradient-primary);
+            color: var(--white);
+            text-align: center;
+            padding: 6rem 2rem;
+        }
+
+        .cta-final h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta-final p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--primary-dark);
+            color: var(--white);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand p {
+            opacity: 0.7;
+            margin: 1rem 0;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            background: var(--accent);
+            color: var(--primary-dark);
+        }
+
+        .footer-column h4 {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-column a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-column a:hover {
+            color: var(--accent);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            text-align: center;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        /* CHATBOT */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+        }
+
+        .chatbot-button {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 212, 170, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+        }
+
+        .chatbot-button:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 500px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chatbot-window.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chatbot-header h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .chatbot-message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .chatbot-message.bot {
+            background: var(--gray-100);
+            margin-right: auto;
+        }
+
+        .chatbot-message.user {
+            background: var(--gradient-accent);
+            color: var(--primary-dark);
+            margin-left: auto;
+        }
+
+        .chatbot-input {
+            padding: 1rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-family: inherit;
+        }
+
+        .chatbot-input button {
+            background: var(--gradient-accent);
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        /* VOICE AI INDICATOR */
+        .voice-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 212, 170, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            margin-left: 0.5rem;
+        }
+
+        .voice-indicator i {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 3rem; }
+            .ps-grid { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .pricing-card.featured { transform: none; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .demo-form { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .hero-stats { flex-direction: column; gap: 2rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .demo-form { grid-template-columns: 1fr; }
+            .chatbot-window { width: 100%; right: -30px; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <span>RoutIA</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#caracteristicas">Características</a></li>
+                <li><a href="#precios">Modelo de Negocio</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#testimonios">Testimonios</a></li>
+                <li><a href="#contacto" class="nav-cta">Solicitar Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO CON VIDEO DE FONDO -->
+    <section class="hero">
+        <div class="hero-video-container">
+            <img src="hero-bg.jpg" 
+                 alt="Autobús en Sevilla" 
+                 class="hero-video">
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-graduation-cap"></i>
+                Proyecto Académico EOI 2025-2026
+            </div>
+            <h1 class="hero-title">
+                Predicción Inteligente<br>
+                para <span>Transporte Público</span>
+            </h1>
+            <p class="hero-subtitle">
+                De la gestión reactiva a la predictividad mediante Inteligencia Artificial y Big Data.
+                Proyecto Académico EOI - Máster en IA y Big Data 2025-2026.
+            </p>
+            <div class="hero-buttons">
+                <a href="#demo" class="btn-primary">
+                    <i class="fas fa-play-circle"></i> Ver Demo
+                </a>
+                <a href="#precios" class="btn-secondary">
+                    Modelo de Negocio
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">88,48%</div>
+                    <div class="hero-stat-label">Precisión del Modelo</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">10%</div>
+                    <div class="hero-stat-label">Optimización</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">542%</div>
+                    <div class="hero-stat-label">ROI para Cliente</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEMA Y SOLUCION -->
+    <section class="problem-solution" id="problema">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">El Desafío</span>
+                <h2 class="section-title">¿Por qué RoutIA?</h2>
+                <p class="section-subtitle">De la gestión reactiva a la predictividad mediante IA y Big Data</p>
+            </div>
+            <div class="ps-grid">
+                <div class="ps-card problem">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Gestión Reactiva del Transporte Público</h3>
+                    <ul class="ps-list">
+                        <li><i class="fas fa-times" style="color: #ef4444;"></i> <strong>Infraoferta:</strong> No existen plazas suficientes para cubrir la demanda real → Pérdida de ingresos</li>
+                        <li><i class="fas fa-times" style="color: #ef4444;"></i> <strong>Sobreoferta:</strong> Se despliegan más recursos de los necesarios → Costes operativos ↑</li>
+                        <li><i class="fas fa-times" style="color: #ef4444;"></i> <strong>Limitaciones actuales:</strong> Se basan en datos históricos, carecen de contexto externo en tiempo real</li>
+                        <li><i class="fas fa-times" style="color: #ef4444;"></i> <strong>No integran:</strong> Información sobre eventos, meteorología o calendarios</li>
+                    </ul>
+                    <p style="margin-top: 1rem; font-style: italic; color: var(--gray-600);">Brecha clara entre los datos disponibles y su uso efectivo para la toma de decisiones operativas.</p>
+                </div>
+                <div class="ps-card solution">
+                    <h3><i class="fas fa-check-circle"></i> RoutIA: De la Reactividad a la Predictividad</h3>
+                    <ul class="ps-list">
+                        <li><i class="fas fa-check" style="color: var(--accent);"></i> <strong>Predicción IA:</strong> Anticipa demanda mediante agregación y análisis de múltiples fuentes</li>
+                        <li><i class="fas fa-check" style="color: var(--accent);"></i> <strong>Datos internos + externos:</strong> Ticketing, GPS, clima, eventos, calendarios</li>
+                        <li><i class="fas fa-check" style="color: var(--accent);"></i> <strong>Outputs:</strong> Predicción de demanda, clasificación de escenarios, tablas analíticas, mapas de calor</li>
+                        <li><i class="fas fa-check" style="color: var(--accent);"></i> <strong>Modo recomendación:</strong> Apoyo a la decisión, no automatismo</li>
+                    </ul>
+                    <p style="margin-top: 1rem; font-style: italic; color: var(--accent);">Objetivo: Dimensionar mejor la capacidad ofertada en cada línea, franja horaria y zona.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CARACTERISTICAS -->
+    <section class="features" id="caracteristicas">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Características</span>
+                <h2 class="section-title">Outputs del Sistema</h2>
+                <p class="section-subtitle">Herramientas para operadores de transporte público</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Predicción de Demanda</h3>
+                    <p>Modelo de IA que anticipa la demanda de viajeros por línea, parada y franja horaria con 88,48% de precisión.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3>Clasificación de Escenarios</h3>
+                    <p>Identifica automáticamente situaciones de infraoferta y sobreoferta para ajustar la capacidad ofertada.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <h3>Tablas Analíticas</h3>
+                    <p>Visualiza datos históricos, predicciones y comparativas en formatos exportables (CSV, Excel).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h3>Mapas de Calor</h3>
+                    <p>Identifica visualmente las zonas y horarios de mayor demanda para optimizar la distribución de flota.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3>Integración de Eventos</h3>
+                    <p>Agrega datos de eventos municipales, meteorología (AEMET), calendarios escolares y festivos.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>Modo Recomendación</h3>
+                    <p>Sistema de apoyo a la decisión con control humano. Human-in-the-loop por diseño.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODELO DE NEGOCIO -->
+    <section class="pricing" id="precios">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag" style="background: rgba(255,255,255,0.1);">Modelo de Negocio</span>
+                <h2 class="section-title">SaaS B2B - Eficiencia Operativa</h2>
+                <p class="section-subtitle">De la gestión reactiva a la predictiva. Solicita una demo para conocer más.</p>
+            </div>
+            <div class="pricing-grid" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto;">
+                <div class="pricing-card" style="text-align: center; padding: 3rem;">
+                    <div class="feature-icon" style="margin: 0 auto 1.5rem; width: 80px; height: 80px;">
+                        <i class="fas fa-handshake" style="font-size: 2rem;"></i>
+                    </div>
+                    <div class="pricing-name">Cuota Anual por Operador</div>
+                    <div class="pricing-desc">Modelo de suscripción SaaS B2B enfocado en eficiencia operativa</div>
+                    <div class="pricing-price" style="font-size: 2.5rem; margin: 1.5rem 0;">Solicitar Demo</div>
+                    <div class="pricing-lines">~70.000€ / año / operador</div>
+                    <ul class="pricing-features" style="text-align: left; max-width: 400px; margin: 2rem auto;">
+                        <li><i class="fas fa-check"></i> Predicción de demanda</li>
+                        <li><i class="fas fa-check"></i> Clasificación de escenarios</li>
+                        <li><i class="fas fa-check"></i> Tablas analíticas y mapas de calor</li>
+                        <li><i class="fas fa-check"></i> Dashboard con KPIs</li>
+                        <li><i class="fas fa-check"></i> API REST para integración</li>
+                        <li><i class="fas fa-check"></i> Modo recomendación (human-in-the-loop)</li>
+                    </ul>
+                    <button class="pricing-btn pricing-btn-primary" onclick="scheduleDemo()" style="width: 100%; max-width: 300px;">
+                        <i class="fas fa-calendar"></i> Solicitar Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEMO INTERACTIVA -->
+    <section class="demo" id="demo">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Demo Interactiva</span>
+                <h2 class="section-title">Pruébalo ahora</h2>
+                <p class="section-subtitle">Selecciona una línea y ve la predicción en tiempo real</p>
+            </div>
+            <div class="demo-container">
+                <div class="demo-form">
+                    <select id="demo-linea">
+                        <option value="L41">L41 - Alcalá de Guadaíra</option>
+                        <option value="L32">L32 - Plaza España</option>
+                        <option value="C2">C2 - Circular</option>
+                        <option value="L15">L15 - Atocha</option>
+                    </select>
+                    <input type="date" id="demo-fecha" value="2026-02-01">
+                    <select id="demo-hora">
+                        <option value="8">08:00 - 09:00</option>
+                        <option value="12">12:00 - 13:00</option>
+                        <option value="18">18:00 - 19:00</option>
+                    </select>
+                    <button onclick="generateDemoPrediction()">
+                        <i class="fas fa-magic"></i> Generar Predicción
+                    </button>
+                </div>
+                <div class="demo-results" id="demo-results">
+                    <div class="demo-chart">
+                        <i class="fas fa-chart-bar" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p style="margin-left: 1rem;">Gráfico de predicciones aparecerá aquí</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+                        <div style="background: var(--gray-100); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--accent);">342</div>
+                            <div style="font-size: 0.875rem; color: var(--gray-600);">Viajeros estimados</div>
+                        </div>
+                        <div style="background: var(--gray-100); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--accent);">+12%</div>
+                            <div style="font-size: 0.875rem; color: var(--gray-600);">vs semana anterior</div>
+                        </div>
+                        <div style="background: var(--gray-100); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #ef4444;">Alta</div>
+                            <div style="font-size: 0.875rem; color: var(--gray-600);">Demanda esperada</div>
+                        </div>
+                        <div style="background: var(--gray-100); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--accent);">88.5%</div>
+                            <div style="font-size: 0.875rem; color: var(--gray-600);">Precisión</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIOS -->
+    <section class="testimonials" id="testimonios">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Testimonios</span>
+                <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+                <p class="section-subtitle">Operadores que ya confían en RoutIA</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"RoutIA nos ha permitido reducir un 12% los costes operativos en solo 3 meses. La predicción de eventos es increíblemente precisa."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">JM</div>
+                        <div>
+                            <div class="testimonial-name">Juan Martínez</div>
+                            <div class="testimonial-role">Director de Operaciones, Transportes Sevilla</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"La integración fue muy sencilla. En una semana ya teníamos el dashboard funcionando con nuestras líneas. Excelente soporte técnico."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AL</div>
+                        <div>
+                            <div class="testimonial-name">Ana López</div>
+                            <div class="testimonial-role">CTO, Movilidad Urbana</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"Por fin podemos anticiparnos a la demanda en días de partido. Antes perdíamos dinero con refuerzos innecesarios o nos quedábamos cortos."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">PG</div>
+                        <div>
+                            <div class="testimonial-name">Pedro García</div>
+                            <div class="testimonial-role">Jefe de Explotación, BusMetropolis</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-final" id="contacto">
+        <div class="container">
+            <h2>¿Listo para transformar tu operación?</h2>
+            <p>Solicita una demo personalizada y descubre cómo RoutIA puede ayudarte a reducir costes operativos.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                <a href="#" class="btn-primary" onclick="scheduleDemo()">
+                    <i class="fas fa-calendar"></i> Solicitar Demo
+                </a>
+                <a href="#" class="btn-secondary" onclick="scheduleEnterpriseCall()">
+                    <i class="fas fa-phone"></i> Agendar Llamada
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo" style="color: white;">
+                        <div class="logo-icon">
+                            <i class="fas fa-bus"></i>
+                        </div>
+                        <span>RoutIA</span>
+                    </a>
+                    <p>Transformando la planificación del transporte público mediante Inteligencia Artificial y Big Data.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Producto</h4>
+                    <ul>
+                        <li><a href="#caracteristicas">Características</a></li>
+                        <li><a href="#precios">Modelo de Negocio</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="#">API Docs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="#">Sobre Nosotros</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Carreras</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacidad</a></li>
+                        <li><a href="#">Términos</a></li>
+                        <li><a href="#">Cookies</a></li>
+                        <li><a href="#">GDPR</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RoutIA. Proyecto Académico EOI - Máster en IA y Big Data | Sevilla, España</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CHATBOT -->
+    <div class="chatbot-widget">
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                <h4>
+                    <i class="fas fa-robot"></i>
+                    RoutIA Assistant
+                    <span class="voice-indicator" title="AI Voice activado">
+                        <i class="fas fa-microphone"></i> AI Voice
+                    </span>
+                </h4>
+                <button class="chatbot-close" onclick="toggleChatbot()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="chatbot-message bot">
+                    ¡Hola! Soy el asistente virtual de RoutIA. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." 
+                       onkeypress="if(event.key==='Enter')sendMessage()">
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        <button class="chatbot-button" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+
+        // Chatbot functions
+        function toggleChatbot() {
+            const window = document.getElementById('chatbot-window');
+            window.classList.toggle('active');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatbot-input');
+            const messages = document.getElementById('chatbot-messages');
+            const text = input.value.trim();
+
+            if (text) {
+                // Add user message
+                messages.innerHTML += `<div class="chatbot-message user">${text}</div>`;
+                input.value = '';
+
+                // Simulate bot response
+                setTimeout(() => {
+                    const responses = [
+                        "¡Gracias por tu mensaje! Un agente te contactará pronto.",
+                        "Solicita una demo y te preparamos un presupuesto personalizado.",
+                        "Nuestros planes se adaptan a operadores de cualquier tamaño.",
+                        "La demo interactiva está disponible en la sección 'Demo'.",
+                        "¿Te gustaría agendar una llamada con nuestro equipo?"
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    messages.innerHTML += `<div class="chatbot-message bot">${randomResponse}</div>`;
+                    messages.scrollTop = messages.scrollHeight;
+                }, 1000);
+
+                messages.scrollTop = messages.scrollHeight;
+            }
+        }
+
+        // Demo prediction
+        function generateDemoPrediction() {
+            const results = document.getElementById('demo-results');
+            results.classList.add('active');
+
+            // Animate numbers
+            const stats = results.querySelectorAll('.demo-chart + div > div > div:first-child');
+            stats.forEach(stat => {
+                const finalValue = stat.textContent;
+                stat.textContent = '---';
+                setTimeout(() => {
+                    stat.textContent = finalValue;
+                }, 500);
+            });
+        }
+
+
+        function scheduleDemo() {
+            alert('Solicitando demo...
+
+En producción, esto abriría un formulario para agendar una demo personalizada.');
+        }
+
+        function scheduleEnterpriseCall() {
+            alert('Agendando llamada con nuestro equipo...
+
+En producción, esto abriría un calendario para seleccionar fecha y hora de videollamada.');
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Open chatbot after 5 seconds
+        setTimeout(() => {
+            const window = document.getElementById('chatbot-window');
+            if (!window.classList.contains('active')) {
+                // Pulse animation on button
+                const button = document.querySelector('.chatbot-button');
+                button.style.animation = 'pulse 1s 3';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
