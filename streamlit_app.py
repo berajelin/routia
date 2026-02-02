@@ -285,6 +285,9 @@ else:
         - **Deploy:** Docker + Cloud
 
         ### Equipo
+        - **CEO:** Marcos Garcia Ojeda
+        - **CFO:** Alvaro Garcia Solis
+        - **CTO:** Jose Angel Santos
         - **CDO:** Berajelin Gaitan
         - **Proyecto:** EOI Sevilla
         """)
